@@ -1,0 +1,6 @@
+﻿  main.cpp
+d:\projects\audio\project_audio\project_audio\keyboard.h(108): warning C4800: 'int': forcing value to bool 'true' or 'false' (performance warning)
+  Generating code
+  All 676 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  Project_Audio.vcxproj -> D:\Projects\Audio\Project_Audio\Project_Audio\Release\Project_Audio.exe

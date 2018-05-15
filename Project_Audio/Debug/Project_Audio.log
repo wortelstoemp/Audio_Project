@@ -1,0 +1,4 @@
+﻿  main.cpp
+d:\projects\audio\project_audio\project_audio\keyboard.h(123): warning C4800: 'int': forcing value to bool 'true' or 'false' (performance warning)
+d:\projects\audio\project_audio\project_audio\harmonica_patch.h(37): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+  Project_Audio.vcxproj -> D:\Projects\Audio\Project_Audio\Project_Audio\Debug\Project_Audio.exe
