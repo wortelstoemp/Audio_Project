@@ -170,12 +170,15 @@
     <ClInclude Include="audio_settings.h" />
     <ClInclude Include="delay_filter.h" />
     <ClInclude Include="envelope_adsr.h" />
+    <ClInclude Include="example_patches.h" />
     <ClInclude Include="feedback_comb_filter.h" />
     <ClInclude Include="feedforward_comb_filter.h" />
     <ClInclude Include="harmonica_patch.h" />
+    <ClInclude Include="highpass_filter.h" />
     <ClInclude Include="iir_filter.h" />
     <ClInclude Include="keyboard.h" />
     <ClInclude Include="lfo.h" />
+    <ClInclude Include="lowpass_filter.h" />
     <ClInclude Include="mixer.h" />
     <ClInclude Include="noise_oscillator.h" />
     <ClInclude Include="audio_core.h" />

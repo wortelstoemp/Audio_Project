@@ -14,12 +14,12 @@
 
 #include "bell_patch.h"
 #include "harmonica_patch.h"
+#include "example_patches.h"
 
 
 int main()
 {
-	std::cout << "Synthesizer 1.0" << std::endl;
-	//AudioReadFile("D:\\Projects\\Audio\\Project_Audio\\Project_Audio\\Data\\babe.wav");
+	std::cout << "Synthesizer 1.0 by Tom Quareme and Dries Reyskens" << std::endl;
 
 	AudioDevice audio_device;
 	{
@@ -50,6 +50,10 @@ int main()
 		"|  Q  |  S  |  D  |  F  |  G  |  H  |  J  |" << std::endl <<
 		"|_____|_____|_____|_____|_____|_____|_____|" << std::endl << std::endl;
 
+	std::cout << "Use up and down arrow keys to adjust frequency in steps of 10 Hz." << std::endl;
+	std::cout << "Use Esc key to stop the synth. Reload program to select another patch." << std::endl;
+
+
 	AudioSettings::Properties().Init(48000, 1, 8, 512);
 
 	AudioCore32Bit synth
@@ -63,7 +67,8 @@ int main()
 	
 	////////////////////////////////////////////////////////////////////////////
 	// NOTE: Create and set patches here
-	Patch* patch = new HarmonicaPatch(0.4);
+	//Patch* patch = new HarmonicaPatch(0.4);
+	Patch* patch = new Example15Patch(0.4);
 	// other patches...
 
 	synth.SetPatch(patch);

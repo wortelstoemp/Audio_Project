@@ -7,7 +7,6 @@
 
 #include "audio_settings.h"
 #include "oscillator.h"
-#include "lfo.h"
 
 // Generates a sine wave with amplitude in [-1,1]
 /*double SineOscillator(double frequency, double phase, double time, LFO lfo = LFO(0.0, 0.0))

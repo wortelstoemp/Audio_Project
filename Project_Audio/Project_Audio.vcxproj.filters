@@ -98,5 +98,14 @@
     <ClInclude Include="audio_settings.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="example_patches.h">
+      <Filter>Header Files\patches</Filter>
+    </ClInclude>
+    <ClInclude Include="lowpass_filter.h">
+      <Filter>Header Files\filters</Filter>
+    </ClInclude>
+    <ClInclude Include="highpass_filter.h">
+      <Filter>Header Files\filters</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

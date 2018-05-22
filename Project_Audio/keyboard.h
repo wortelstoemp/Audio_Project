@@ -137,12 +137,25 @@ struct Keyboard
 	void Loop(AudioCore<T>* core, Patch* patch)
 	{
 		bool noteKeyPressed = false;
+		bool closePressed = false;
 		bool freqUpPressed = false;
 		bool freqDownPressed = false;
 
 		bool keyboardLoop = true;
 		while (keyboardLoop) {
 			noteKeyPressed = false;
+
+			if (GetAsyncKeyState(VK_ESCAPE) != 0) {
+				closePressed = true;
+			}
+			else if (closePressed) {
+				// On release
+				closePressed = false;
+				keyboardLoop = false;
+				core->Stop();
+				std::cout << "\nClosing synth..." << std::endl;
+				continue;
+			}
 			
 			if (GetAsyncKeyState(VK_UP) != 0) {
 				freqUpPressed = true;

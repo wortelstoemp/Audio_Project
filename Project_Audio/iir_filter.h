@@ -26,7 +26,7 @@ public:
 		// y[n] = (1-alpha)*x[n] + alpha*y[n-1]
 		// In the book we use alpha = 0.5,
 		// but here we can adjust alpha via a time constant
-		double output = alpha*previousOutput + (1.0-alpha)*input;
+		double output = (1.0 - alpha)*input + alpha*previousOutput;
 		previousOutput = output;
 
 		return output;
