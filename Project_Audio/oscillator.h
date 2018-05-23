@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "audio_settings.h"
+#include "lfo.h"
 
 #define OSCILLATOR_WAVETABLE_SAMPLE_COUNT 65538
 
@@ -37,7 +38,7 @@ public:
 		const int sampleCount = OSCILLATOR_WAVETABLE_SAMPLE_COUNT;
 		this->frequency = ((double)AudioSettings::Properties().SampleRate()) / sampleCount;
 		this->wavetable.resize(sampleCount);
-		index = 0;
+		this->index = 0;
 	}
 
 	virtual void FillWavetable() = 0;
@@ -48,7 +49,7 @@ public:
 		const double increment = (sampleCount * desiredFrequency) / AudioSettings::Properties().SampleRate();
 		
 		index = std::fmod((index + increment), sampleCount);
-		double output = Interpolate(wavetable, index);
+		const double output = Interpolate(wavetable, index);
 		
 		return output;
 	}

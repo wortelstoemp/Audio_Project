@@ -377,7 +377,7 @@ struct Example13Patch : public Patch
 
 	Example13Patch(double volume = 1.0)
 		: Patch(volume),
-		allpass(500.0, 0.7)
+		allpass(50.0, 0.7)
 	{
 		envelopeADSR.attackTime = 0.01;
 		envelopeADSR.decayTime = 0.0;
@@ -452,6 +452,33 @@ struct Example15Patch : public Patch
 		double modulatedAmplitude = envelopeADSR.ModulatedAmplitude(time);
 		double result = modulatedAmplitude * noiseOsc.Oscillate(outputFrequency);
 		result = hpf.Filter(result);
+		result *= masterVolume;
+
+		return result;
+	}
+};
+
+// Example 16: "16: Low Frequency Oscillator (LFO)"
+struct Example16Patch : public Patch
+{
+	SineRealTimeOscillator sineOsc;
+
+	Example16Patch(double volume = 1.0)
+		: Patch(volume)
+	{
+		envelopeADSR.attackTime = 0.01;
+		envelopeADSR.decayTime = 0.0;
+		envelopeADSR.sustainAmplitude = 1.0;
+		envelopeADSR.releaseTime = 0.1;
+		outputFrequency = 0.0;
+		masterVolume = volume;
+	}
+
+	double Run(double time)
+	{
+		double modulatedAmplitude = envelopeADSR.ModulatedAmplitude(time);
+		double result = modulatedAmplitude * sineOsc.Oscillate(time, outputFrequency, 0.0, LFO(0.02, 5.0));
+
 		result *= masterVolume;
 
 		return result;

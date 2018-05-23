@@ -7,6 +7,7 @@
 
 #include "audio_settings.h"
 #include "oscillator.h"
+#include "lfo.h"
 
 // Generates a sine wave with amplitude in [-1,1]
 /*double SineOscillator(double frequency, double phase, double time, LFO lfo = LFO(0.0, 0.0))
@@ -33,5 +34,21 @@ public:
 
 			wavetable[i] = std::sin(2 * M_PI * frequency * time);
 		}
+	}
+};
+
+class SineRealTimeOscillator
+{
+public:
+	SineRealTimeOscillator()
+	{
+	}
+
+	double Oscillate(double time, double frequency, double phase = 0.0, LFO lfo = LFO(0.0, 0.0))
+	{
+		double modFreq = lfo.ModulatedFrequency(frequency, time);
+		double output = std::sin(2 * M_PI * frequency * time + modFreq + phase);
+
+		return output;
 	}
 };
