@@ -1,72 +1,39 @@
-/*
-OneLoneCoder.com - Simple Audio Noisy Thing
-"Allows you to simply listen to that waveform!" - @Javidx9
-License
-~~~~~~~
-Copyright (C) 2018  Javidx9
-This program comes with ABSOLUTELY NO WARRANTY.
-This is free software, and you are welcome to redistribute it
-under certain conditions; See license for details.
-Original works located at:
-https://www.github.com/onelonecoder
-https://www.onelonecoder.com
-https://www.youtube.com/javidx9
-GNU GPLv3
-https://github.com/OneLoneCoder/videos/blob/master/LICENSE
-From Javidx9 :)
-~~~~~~~~~~~~~~~
-Hello! Ultimately I don't care what you use this for. It's intended to be
-educational, and perhaps to the oddly minded - a little bit of fun.
-Please hack this, change it and use it in any way you see fit. You acknowledge
-that I am not responsible for anything bad that happens as a result of
-your actions. However this code is protected by GNU GPLv3, see the license in the
-github repo. This means you must attribute me if you use it. You can view this
-license here: https://github.com/OneLoneCoder/videos/blob/master/LICENSE
-Cheers!
-Author
-~~~~~~
-Twitter: @javidx9
-Blog: www.onelonecoder.com
-Versions
-~~~~~~~~
-1.0 - 14/01/17
-- Controls audio output hardware behind the scenes so you can just focus
-on creating and listening to interesting waveforms.
-- Currently MS Windows only
-Documentation
-~~~~~~~~~~~~~
-See video: https://youtu.be/tgamhuQnOkM
-This will improve as it grows!
-*/
+// Based on: 
+// - Handmade Hero Audio Platform Layer by Casey Muratori
+// - OneLoneCoder's Audio Platform Layer
 
+// Author (adaptations): Tom Quareme
+
+// Currently only Microsoft Windows is supported.
+// In the future we might use Handmade Penguin tutorials to
+// create a platform layer in SDL2 in order to support
+// Microsoft Windows, Linux and macOS together.
 
 #pragma once
 
 #pragma comment(lib, "winmm.lib")
 
-#include <iostream>
 #include <cmath>
+#include <cstdint>
+#include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
-#include <thread>
 #include <atomic>
 #include <condition_variable>
-#include <cstdint>
+#include <thread>
 
 #include <Windows.h>
 
 #include "patch.h"
 
-const double PI = 2.0 * acos(0.0);
-
-static double AudioCoreClip(double dSample, double dMax)
+static double AudioCoreClip(double sampleValue, double maximumValue)
 {
-	if (dSample >= 0.0) {
-		return fmin(dSample, dMax);
-	} else {
-		return fmax(dSample, -dMax);
-	}
+	if (sampleValue >= 0.0) {
+		return std::fmin(sampleValue, maximumValue);
+	} 
+	
+	return std::fmax(sampleValue, -maximumValue);
 }
 
 template<class T>
@@ -81,77 +48,87 @@ typedef AudioCore<int64_t> AudioCore64Bit;
 template<class T>
 class AudioCore
 {
-public:
-	AudioCore(AudioDevice sOutputDevice, unsigned int nSampleRate = 44100, unsigned int nChannels = 1, unsigned int nBlocks = 8, unsigned int nBlockSamples = 512)
+private:
+	Patch* patch = nullptr;
+	double(*patchFunction)(Patch*, double);
+
+	unsigned int sampleRate;
+	unsigned int channelCount;
+	unsigned int blockCount;
+	unsigned int blockSampleCount;
+	unsigned int currentBlock;
+
+	T* blockMemory;
+	WAVEHDR* waveHeaders;
+	HWAVEOUT outputDevice;
+
+	std::thread audioThread;
+	std::atomic<bool> initialized;
+	std::atomic<unsigned int> freeBlockCount;
+	std::condition_variable conditionalBlockNotZero;
+	std::mutex mutexBlockNotZero;
+	std::atomic<double> totalTime;
+
+	bool Create(AudioDevice audioDevice, unsigned int sampleRate = 44100, unsigned int channelCount = 1, unsigned int blockCount = 8, unsigned int blockSampleCount = 512)
 	{
-		Create(sOutputDevice, nSampleRate, nChannels, nBlocks, nBlockSamples);
-	}
+		this->initialized = false;
+		this->sampleRate = sampleRate;
+		this->channelCount = channelCount;
+		this->blockCount = blockCount;
+		this->blockSampleCount = blockSampleCount;
+		this->freeBlockCount = this->blockCount;
+		this->currentBlock = 0;
+		this->blockMemory = nullptr;
+		this->waveHeaders = nullptr;
+		this->patchFunction = nullptr;
 
-	~AudioCore()
-	{
-		Destroy();
-	}
-
-	bool Create(AudioDevice sOutputDevice, unsigned int nSampleRate = 44100, unsigned int nChannels = 1, unsigned int nBlocks = 8, unsigned int nBlockSamples = 512)
-	{
-		m_bReady = false;
-		m_nSampleRate = nSampleRate;
-		m_nChannels = nChannels;
-		m_nBlockCount = nBlocks;
-		m_nBlockSamples = nBlockSamples;
-		m_nBlockFree = m_nBlockCount;
-		m_nBlockCurrent = 0;
-		m_pBlockMemory = nullptr;
-		m_pWaveHeaders = nullptr;
-
-		m_PatchFunction = nullptr;
-
-		// Validate device
 		std::vector<AudioDevice> devices = EnumerateDevices();
-		auto d = std::find(devices.begin(), devices.end(), sOutputDevice);
-		if (d != devices.end())
-		{
-			// Device is available
-			int nDeviceID = distance(devices.begin(), d);
+		const auto device = std::find(devices.begin(), devices.end(), audioDevice);
+
+		// When there is an audio device
+		if (device != devices.end()) {
+			const int deviceID = distance(devices.begin(), device);
 			WAVEFORMATEX waveFormat;
-			waveFormat.wFormatTag = WAVE_FORMAT_PCM;
-			waveFormat.nSamplesPerSec = m_nSampleRate;
-			waveFormat.wBitsPerSample = sizeof(T) * 8;
-			waveFormat.nChannels = m_nChannels;
-			waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
-			waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
-			waveFormat.cbSize = 0;
+			{
+				waveFormat.wFormatTag = WAVE_FORMAT_PCM;
+				waveFormat.nSamplesPerSec = this->sampleRate;
+				waveFormat.wBitsPerSample = sizeof(T) * 8;
+				waveFormat.nChannels = this->channelCount;
+				waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
+				waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
+				waveFormat.cbSize = 0;
+			}
 
-			// Open Device if valid
-			if (waveOutOpen(&m_hwDevice, nDeviceID, &waveFormat, (DWORD_PTR)waveOutProcWrap, (DWORD_PTR)this, CALLBACK_FUNCTION) != S_OK)
+			// Try to open the audio device
+			if (waveOutOpen(&this->outputDevice, deviceID, &waveFormat, (DWORD_PTR)waveOutProcWrap, (DWORD_PTR)this, CALLBACK_FUNCTION) != S_OK) {
 				return Destroy();
+			}
 		}
 
-		// Allocate Wave|Block Memory
-		m_pBlockMemory = new T[m_nBlockCount * m_nBlockSamples];
-		if (m_pBlockMemory == nullptr)
+		// Memory allocations of block memory and wave headers
+		this->blockMemory = new T[this->blockCount * this->blockSampleCount];
+		if (!this->blockMemory) {
 			return Destroy();
-		ZeroMemory(m_pBlockMemory, sizeof(T) * m_nBlockCount * m_nBlockSamples);
-
-		m_pWaveHeaders = new WAVEHDR[m_nBlockCount];
-		if (m_pWaveHeaders == nullptr)
-			return Destroy();
-		ZeroMemory(m_pWaveHeaders, sizeof(WAVEHDR) * m_nBlockCount);
-
-		// Link headers to block memory
-		for (unsigned int n = 0; n < m_nBlockCount; n++)
-		{
-			m_pWaveHeaders[n].dwBufferLength = m_nBlockSamples * sizeof(T);
-			m_pWaveHeaders[n].lpData = (LPSTR)(m_pBlockMemory + (n * m_nBlockSamples));
 		}
+		ZeroMemory(this->blockMemory, sizeof(T) * this->blockCount * this->blockSampleCount);
 
-		m_bReady = true;
+		this->waveHeaders = new WAVEHDR[this->blockCount];
+		if (!this->waveHeaders) {
+			return Destroy();
+		}
+		ZeroMemory(this->waveHeaders, sizeof(WAVEHDR) * this->blockCount);
 
-		m_thread = std::thread(&AudioCore::MainThread, this);
+		// Couple the wave headers and block memory
+		for (unsigned int i = 0; i < this->blockCount; i++) {
+			this->waveHeaders[i].dwBufferLength = this->blockSampleCount * sizeof(T);
+			this->waveHeaders[i].lpData = (LPSTR)(this->blockMemory + (i * this->blockSampleCount));
+		}
+		this->initialized = true;
 
-		// Start the ball rolling
-		std::unique_lock<std::mutex> lm(m_muxBlockNotZero);
-		m_cvBlockNotZero.notify_one();
+		// Create and start audio thread
+		this->audioThread = std::thread(&AudioCore::AudioThread, this);
+		std::unique_lock<std::mutex> lock(this->mutexBlockNotZero);
+		this->conditionalBlockNotZero.notify_one();
 
 		return true;
 	}
@@ -161,73 +138,63 @@ public:
 		return false;
 	}
 
-	void Stop()
+public:
+	AudioCore(AudioDevice audioDevice, unsigned int sampleRate = 44100, unsigned int channelCount = 1, unsigned int blockCount = 8, unsigned int blockSampleCount = 512)
 	{
-		m_bReady = false;
-		m_thread.join();
+		Create(audioDevice, sampleRate, channelCount, blockCount, blockSampleCount);
 	}
 
-	// Override to process current sample
-	virtual double UserProcess(double dTime)
+	~AudioCore()
+	{
+		Destroy();
+	}
+
+	void Stop()
+	{
+		this->initialized = false;
+		this->audioThread.join();
+	}
+
+	virtual double UserProcess(double time)
 	{
 		return 0.0;
 	}
 
-	double GetTime()
+	double Time()
 	{
-		return m_dGlobalTime;
+		return this->totalTime;
 	}
 
-public:
 	static std::vector<AudioDevice> EnumerateDevices()
 	{
-		int nDeviceCount = waveOutGetNumDevs();
-		std::vector<AudioDevice> sDevices;
-		WAVEOUTCAPS woc;
-		for (int n = 0; n < nDeviceCount; n++)
-			if (waveOutGetDevCaps(n, &woc, sizeof(WAVEOUTCAPS)) == S_OK)
-				sDevices.push_back(woc.szPname);
-		return sDevices;
+		const int deviceCount = waveOutGetNumDevs();
+		std::vector<AudioDevice> devices;
+		WAVEOUTCAPS waveOutCaps;
+		for (int i = 0; i < deviceCount; i++)
+			if (waveOutGetDevCaps(i, &waveOutCaps, sizeof(WAVEOUTCAPS)) == S_OK) {
+				devices.push_back(waveOutCaps.szPname);
+			}
+
+		return devices;
 	}
 
 	void SetPatch(Patch* p)
 	{
-		m_Patch = p;
-		m_PatchFunction = PatchRun;
+		this->patch = p;
+		this->patchFunction = PatchRun;
 	}
 
 private:
-	Patch* m_Patch = nullptr;
-	double(*m_PatchFunction)(Patch*, double);
-
-	unsigned int m_nSampleRate;
-	unsigned int m_nChannels;
-	unsigned int m_nBlockCount;
-	unsigned int m_nBlockSamples;
-	unsigned int m_nBlockCurrent;
-
-	T* m_pBlockMemory;
-	WAVEHDR *m_pWaveHeaders;
-	HWAVEOUT m_hwDevice;
-
-	std::thread m_thread;
-	std::atomic<bool> m_bReady;
-	std::atomic<unsigned int> m_nBlockFree;
-	std::condition_variable m_cvBlockNotZero;
-	std::mutex m_muxBlockNotZero;
-
-	std::atomic<double> m_dGlobalTime;
-
-	// Handler if soundcard requests more data
+	// When sound card sends requests to fill its blocks
 	void waveOutProc(HWAVEOUT hWaveOut, UINT uMsg, DWORD dwParam1, DWORD dwParam2)
 	{
 		if (uMsg != WOM_DONE) { 
 			return; 
 		}
 
-		m_nBlockFree++;
-		std::unique_lock<std::mutex> lm(m_muxBlockNotZero);
-		m_cvBlockNotZero.notify_one();
+		this->freeBlockCount++;
+		std::unique_lock<std::mutex> lock(mutexBlockNotZero);
+		conditionalBlockNotZero.notify_one();
 	}
 
 	// Static wrapper for sound card handler
@@ -236,56 +203,51 @@ private:
 		((AudioCore*)dwInstance)->waveOutProc(hWaveOut, uMsg, dwParam1, dwParam2);
 	}
 
-	// Main thread. This loop responds to requests from the soundcard to fill 'blocks'
-	// with audio data. If no requests are available it goes dormant until the sound
-	// card is ready for more data. The block is fille by the "user" in some manner
-	// and then issued to the soundcard.
-	void MainThread()
+	// In this thread we provide a loop where the sound card will send requests to us.
+	// When such a request happens we will fill memory blocks of the sound card with audio samples.
+	void AudioThread()
 	{
-		m_dGlobalTime = 0.0;
-		double dTimeStep = 1.0 / (double)m_nSampleRate;
+		this->totalTime = 0.0;
+		double deltaTime = 1.0 / (double)sampleRate;
 
-		// Goofy hack to get maximum integer for a type at runtime
-		T nMaxSample = (T)pow(2, (sizeof(T) * 8) - 1) - 1;
-		double dMaxSample = (double)nMaxSample;
-		T nPreviousSample = 0;
+		// Maximum integer for a specific datatype T
+		T maxInteger = (T)pow(2, (sizeof(T) * 8) - 1) - 1;
+		double maxSample = (double)maxInteger;
+		T previousSample = 0;
 
-		while (m_bReady)
-		{
-			// Wait for block to become available
-			if (m_nBlockFree == 0)
-			{
-				std::unique_lock<std::mutex> lm(m_muxBlockNotZero);
-				m_cvBlockNotZero.wait(lm);
+		while (initialized) {
+			// Wait for available block
+			if (this->freeBlockCount == 0) {
+				std::unique_lock<std::mutex> lock(mutexBlockNotZero);
+				conditionalBlockNotZero.wait(lock);
 			}
 
-			// Block is here, so use it
-			m_nBlockFree--;
-
 			// Prepare block for processing
-			if (m_pWaveHeaders[m_nBlockCurrent].dwFlags & WHDR_PREPARED)
-				waveOutUnprepareHeader(m_hwDevice, &m_pWaveHeaders[m_nBlockCurrent], sizeof(WAVEHDR));
+			this->freeBlockCount--;
+			if (this->waveHeaders[this->currentBlock].dwFlags & WHDR_PREPARED) {
+				waveOutUnprepareHeader(this->outputDevice, &this->waveHeaders[this->currentBlock], sizeof(WAVEHDR));
+			}
 
-			T nNewSample = 0;
-			int nCurrentBlock = m_nBlockCurrent * m_nBlockSamples;
+			T newSample = 0;
+			int currentBlock = this->currentBlock * this->blockSampleCount;
 
-			for (unsigned int n = 0; n < m_nBlockSamples; n++) {
-				// User Process
-				if (m_PatchFunction == nullptr)
-					nNewSample = (T)(AudioCoreClip(UserProcess(m_dGlobalTime), 1.0) * dMaxSample);
-				else
-					nNewSample = (T)(AudioCoreClip(m_PatchFunction(m_Patch, m_dGlobalTime), 1.0) * dMaxSample);
+			for (unsigned int i = 0; i < this->blockSampleCount; i++) {
+				if (!this->patchFunction) {
+					newSample = (T)(AudioCoreClip(UserProcess(this->totalTime), 1.0) * maxSample);
+				} else {
+					newSample = (T)(AudioCoreClip(this->patchFunction(patch, this->totalTime), 1.0) * maxSample);
+				}
 
-				m_pBlockMemory[nCurrentBlock + n] = nNewSample;
-				nPreviousSample = nNewSample;
-				m_dGlobalTime = m_dGlobalTime + dTimeStep;
+				this->blockMemory[currentBlock + i] = newSample;
+				previousSample = newSample;
+				this->totalTime = this->totalTime + deltaTime;
 			}
 
 			// Send block to sound device
-			waveOutPrepareHeader(m_hwDevice, &m_pWaveHeaders[m_nBlockCurrent], sizeof(WAVEHDR));
-			waveOutWrite(m_hwDevice, &m_pWaveHeaders[m_nBlockCurrent], sizeof(WAVEHDR));
-			m_nBlockCurrent++;
-			m_nBlockCurrent %= m_nBlockCount;
+			waveOutPrepareHeader(this->outputDevice, &this->waveHeaders[this->currentBlock], sizeof(WAVEHDR));
+			waveOutWrite(this->outputDevice, &this->waveHeaders[this->currentBlock], sizeof(WAVEHDR));
+			this->currentBlock++;
+			this->currentBlock %= this->blockCount;
 		}
 	}
 };

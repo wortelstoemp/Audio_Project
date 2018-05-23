@@ -181,7 +181,7 @@ struct Keyboard
 				if (NotePressed(k)) {
 					if (currentKeyIndex != k) {
 						currentKeyIndex = k;
-						patch->envelopeADSR.NotePressed(core->GetTime());
+						patch->envelopeADSR.NotePressed(core->Time());
 
 						patch->outputFrequency = patch->NoteToFrequency(k);
 						std::cout << "\rNote On : " << patch->outputFrequency << "Hz                             ";
@@ -194,7 +194,7 @@ struct Keyboard
 			if (!noteKeyPressed) {
 				if (currentKeyIndex != -1) {
 					currentKeyIndex = -1;
-					patch->envelopeADSR.NoteReleased(core->GetTime());
+					patch->envelopeADSR.NoteReleased(core->Time());
 
 					std::cout << "\rNote Off                                 ";
 				}

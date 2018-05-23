@@ -31,28 +31,6 @@ int main()
 		std::wcout << "Audio device: " << audio_device << std::endl;
 	}
 
-	/*std::cout << std::endl <<
-		"Qwerty keyboard layout example:" << std::endl << std::endl <<
-		"|   |   | |   |   |   |   | |   | |   |   |" << std::endl <<
-		"|   | W | | E |   |   | T | | Y | | U |   |" << std::endl <<
-		"|   |___| |___|   |   |___| |___| |___|   |" << std::endl <<
-		"|     |     |     |     |     |     |     |" << std::endl <<
-		"|  A  |  S  |  D  |  F  |  G  |  H  |  J  |" << std::endl <<
-		"|_____|_____|_____|_____|_____|_____|_____|" << std::endl << std::endl;*/
-
-	std::cout << std::endl <<
-		"Azerty keyboard layout example:" << std::endl << std::endl <<
-		"|   |   | |   |   |   |   | |   | |   |   |" << std::endl <<
-		"|   | Z | | E |   |   | T | | Y | | U |   |" << std::endl <<
-		"|   |___| |___|   |   |___| |___| |___|   |" << std::endl <<
-		"|     |     |     |     |     |     |     |" << std::endl <<
-		"|  Q  |  S  |  D  |  F  |  G  |  H  |  J  |" << std::endl <<
-		"|_____|_____|_____|_____|_____|_____|_____|" << std::endl << std::endl;
-
-	std::cout << "Use up and down arrow keys to adjust frequency in steps of 10 Hz." << std::endl;
-	std::cout << "Use Esc key to stop the synth. Reload program to select another patch." << std::endl;
-
-
 	AudioSettings::Properties().Init(48000, 1, 8, 512);
 
 	AudioCore32Bit synth
@@ -66,19 +44,37 @@ int main()
 	
 	////////////////////////////////////////////////////////////////////////////
 	// NOTE: Create and set patches here
-	//Patch* patch = new HarmonicaPatch(0.4);
-	Patch* patch = new Example18Patch(0.4);
-	// other patches...
-
+	Patch* patch = SelectAndAllocateExamplePatch();
 	synth.SetPatch(patch);
 	////////////////////////////////////////////////////////////////////////////
+
+	/*std::cout << std::endl <<
+	"Qwerty keyboard layout example:" << std::endl << std::endl <<
+	"|   |   | |   |   |   |   | |   | |   |   |" << std::endl <<
+	"|   | W | | E |   |   | T | | Y | | U |   |" << std::endl <<
+	"|   |___| |___|   |   |___| |___| |___|   |" << std::endl <<
+	"|     |     |     |     |     |     |     |" << std::endl <<
+	"|  A  |  S  |  D  |  F  |  G  |  H  |  J  |" << std::endl <<
+	"|_____|_____|_____|_____|_____|_____|_____|" << std::endl << std::endl;*/
+
+	std::cout << std::endl <<
+		"Azerty keyboard layout example:" << std::endl << std::endl <<
+		"|   |   | |   |   |   |   | |   | |   |   |" << std::endl <<
+		"|   | Z | | E |   |   | T | | Y | | U |   |" << std::endl <<
+		"|   |___| |___|   |   |___| |___| |___|   |" << std::endl <<
+		"|     |     |     |     |     |     |     |" << std::endl <<
+		"|  Q  |  S  |  D  |  F  |  G  |  H  |  J  |" << std::endl <<
+		"|_____|_____|_____|_____|_____|_____|_____|" << std::endl << std::endl;
+
+	std::cout << "Use up and down arrow keys to adjust frequency in steps of 10 Hz." << std::endl;
+	std::cout << "Use Esc key to stop the synth. Reload program to select another patch." << std::endl;
 
 	// Keyboard loop
 	Keyboard keyboard;
 	keyboard.Loop(&synth, patch);
 
 	// Cleanup
-	delete patch;
+	DeleteExamplePatch(patch);
 
 	return 0;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "patch.h"
 
 #include "sine_oscillator.h"
@@ -49,7 +51,7 @@ public:
 	}
 };
 
-// Example 02: "1: Square oscillator"
+// Example 02: "2: Square oscillator"
 class Example02Patch : public Patch
 {
 private:
@@ -312,7 +314,11 @@ public:
 		outputFrequency = 0.0;
 		masterVolume = volume;
 
-		sampler.Open("D:\\Projects\\Audio\\Project_Audio\\Project_Audio\\Data\\babe.wav");
+		std::string filename;
+		std::string path = ".\\Data\\";
+		std::cout << "Enter filename (reads after Data\\): ";
+		std::cin >> filename;
+		sampler.Open((path + filename).c_str());
 	}
 
 	double Run(double time)
@@ -327,7 +333,7 @@ public:
 	}
 };
 
-// Example 11: "11: Mixer"
+// Example 11: "11: Mixer3"
 class Example11Patch : public Patch
 {
 private:
@@ -578,3 +584,113 @@ public:
 		return result;
 	}
 };
+
+static const int PATCH_EXAMPLE_COUNT = 18;
+static const char* PATCH_EXAMPLES[PATCH_EXAMPLE_COUNT] = {
+	"1: Sine Oscillator [DEFAULT]",
+	"2: Square Oscillator",
+	"3: Saw Oscillator",
+	"4: Triangle Oscillator",
+	"5: Noise Oscillator",
+	"6: ADSR Envelope",
+	"7: Delay Line",
+	"8: Feedforward Comb Filter",
+	"9: Feedback Comb Filter",
+	"10: Sampler",
+	"11: Mixer3",
+	"12: IIR Filter",
+	"13: All-pass Filter",
+	"14: Low-pass Filter",
+	"15: High-pass Filter",
+	"16: Low Frequency Oscillator (LFO)",
+	"17: Reverb Filter (3 serial AP's)",
+	"18: Reverb Filter (3 serial AP's + 4 parallel FFCF's)"
+};
+
+// This function allocates memory for the example patch.
+// Use the corresponding function DeleteExamplePatch to cleanup memory !!!
+Patch* SelectAndAllocateExamplePatch()
+{
+	std::cout << "Patches:" << std::endl;
+	for (int i = 0; i < PATCH_EXAMPLE_COUNT; i++) {
+		std::cout << "\t" << PATCH_EXAMPLES[i] << std::endl;
+	}
+
+	int patchNumber = 1;
+	std::cout << std::endl << "Enter one of the patch numbers: ";
+	std::cin >> patchNumber;
+	if (patchNumber < 1 || patchNumber > PATCH_EXAMPLE_COUNT) {
+		patchNumber = 1;
+	}
+	const int patchIndex = patchNumber - 1;
+	std::cout << "Selected patch '" << PATCH_EXAMPLES[patchIndex] << "'." << std::endl;
+
+	Patch* patch = nullptr;
+
+	switch (patchNumber) {
+		case 1: {
+			patch = new Example01Patch(0.4);
+		} break;
+		case 2: {
+			patch = new Example02Patch(0.5);
+		} break;
+		case 3: {
+			patch = new Example03Patch(0.5);
+		} break;
+		case 4: {
+			patch = new Example04Patch(0.5);
+		} break;
+		case 5: {
+			patch = new Example05Patch(0.5);
+		} break;
+		case 6: {
+			patch = new Example06Patch(0.5);
+		} break;
+		case 7: {
+			patch = new Example07Patch(0.5);
+		} break;
+		case 8: {
+			patch = new Example08Patch(0.5);
+		} break;
+		case 9: {
+			patch = new Example09Patch(0.5);
+		} break;
+		case 10: {
+			patch = new Example10Patch(0.5);
+		} break;
+		case 11: {
+			patch = new Example11Patch(0.5);
+		} break;
+		case 12: {
+			patch = new Example12Patch(0.5);
+		} break;
+		case 13: {
+			patch = new Example13Patch(0.5);
+		} break;
+		case 14: {
+			patch = new Example14Patch(0.5);
+		} break;
+		case 15: {
+			patch = new Example15Patch(0.8);
+		} break;
+		case 16: {
+			patch = new Example16Patch(0.5);
+		} break;
+		case 17: {
+			patch = new Example17Patch(0.5);
+		} break;
+		case 18: {
+			patch = new Example18Patch(0.5);
+		} break;
+		default: {
+			patch = new Example01Patch(0.5);
+		} break;
+	}
+
+	return patch;
+}
+
+void DeleteExamplePatch(Patch* patch)
+{
+	delete patch;
+}

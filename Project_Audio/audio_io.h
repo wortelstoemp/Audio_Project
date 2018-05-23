@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <string>
 
 #include <sndfile.h>
 
@@ -12,7 +13,7 @@ class AudioFileInputStreamer
 private:
 	SNDFILE* file;
 	SF_INFO info;
-	const char* filename;
+	std::string filename;
 	double buffer[AUDIO_FILE_BUFFER_SAMPLE_COUNT];
 	int chunkIndex;
 	int index;
@@ -35,7 +36,7 @@ public:
 	void Open(const char* filename)
 	{
 		this->filename = filename;
-		if (!(file = sf_open(filename, SFM_READ, &info))) {
+		if (!(file = sf_open(this->filename.c_str(), SFM_READ, &info))) {
 			std::cerr << "Could not open file." << std::endl;
 		}
 	}
@@ -48,7 +49,7 @@ public:
 			if (file) {
 				sf_close(file);
 			}
-			if (!(file = sf_open(filename, SFM_READ, &info))) {
+			if (!(file = sf_open(this->filename.c_str(), SFM_READ, &info))) {
 				std::cerr << "Could not open file." << std::endl;
 			}
 			index = 0;
