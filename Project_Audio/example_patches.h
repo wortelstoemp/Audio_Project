@@ -21,10 +21,12 @@
 #include "mixer.h"
 
 // Example 01: "1: Sine oscillator"
-struct Example01Patch : public Patch
+class Example01Patch : public Patch
 {
+private:
 	SineOscillator sineOsc;
 
+public:
 	Example01Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -48,10 +50,12 @@ struct Example01Patch : public Patch
 };
 
 // Example 02: "1: Square oscillator"
-struct Example02Patch : public Patch
+class Example02Patch : public Patch
 {
+private:
 	SquareOscillator squareOsc;
 
+public:
 	Example02Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -75,10 +79,12 @@ struct Example02Patch : public Patch
 };
 
 // Example 03: "3: Saw oscillator"
-struct Example03Patch : public Patch
+class Example03Patch : public Patch
 {
+private:
 	SawOscillator sawOsc;
 
+public:
 	Example03Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -102,10 +108,12 @@ struct Example03Patch : public Patch
 };
 
 // Example 04: "4: Triangle oscillator"
-struct Example04Patch : public Patch
+class Example04Patch : public Patch
 {
+private:
 	TriangleOscillator triangleOsc;
 
+public:
 	Example04Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -129,10 +137,12 @@ struct Example04Patch : public Patch
 };
 
 // Example 05: "5: Noise oscillator"
-struct Example05Patch : public Patch
+class Example05Patch : public Patch
 {
+private:
 	NoiseOscillator noiseOsc;
 
+public:
 	Example05Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -156,10 +166,12 @@ struct Example05Patch : public Patch
 };
 
 // Example 06: "6: ADSR Envelope"
-struct Example06Patch : public Patch
+class Example06Patch : public Patch
 {
+private:
 	SawOscillator sawOsc;
 
+public:
 	Example06Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -183,11 +195,13 @@ struct Example06Patch : public Patch
 };
 
 // Example 07: "7: Delay Line"
-struct Example07Patch : public Patch
+class Example07Patch : public Patch
 {
+private:
 	SawOscillator sawOsc;
 	DelayFilter delay;
 
+public:
 	Example07Patch(double volume = 1.0)
 		: Patch(volume),
 		delay(AudioSettings::Properties().SampleRate(), 1000.0)
@@ -214,11 +228,13 @@ struct Example07Patch : public Patch
 };
 
 // Example 08: "8: Feedforward Comb Filter"
-struct Example08Patch : public Patch
+class Example08Patch : public Patch
 {
+private:
 	SawOscillator sawOsc;
 	FeedforwardCombFilter ffcf;
 
+public:
 	Example08Patch(double volume = 1.0)
 		: Patch(volume),
 		ffcf(500.0, 0.4)
@@ -245,11 +261,13 @@ struct Example08Patch : public Patch
 };
 
 // Example 09: "9: Feedback Comb Filter"
-struct Example09Patch : public Patch
+class Example09Patch : public Patch
 {
+private:
 	SineOscillator sineOsc;
 	FeedbackCombFilter fbcf;
 
+public:
 	Example09Patch(double volume = 1.0)
 		: Patch(volume),
 		fbcf(500.0, 0.4)
@@ -276,11 +294,13 @@ struct Example09Patch : public Patch
 };
 
 // Example 10: "10: Sampler"
-struct Example10Patch : public Patch
+class Example10Patch : public Patch
 {
+private:
 	Sampler sampler;
 	FeedbackCombFilter fbcf;
 
+public:
 	Example10Patch(double volume = 1.0)
 		: Patch(volume),
 		fbcf(500.0, 0.4)
@@ -308,12 +328,14 @@ struct Example10Patch : public Patch
 };
 
 // Example 11: "11: Mixer"
-struct Example11Patch : public Patch
+class Example11Patch : public Patch
 {
+private:
 	SquareOscillator squareOsc1;
 	SquareOscillator squareOsc2;
 	NoiseOscillator noiseOsc;
 
+public:
 	Example11Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -340,11 +362,13 @@ struct Example11Patch : public Patch
 };
 
 // Example 12: "12: IIR Filter"
-struct Example12Patch : public Patch
+class Example12Patch : public Patch
 {
+private:
 	SawOscillator sawOsc;
 	IIRFilter iir;
 
+public:
 	Example12Patch(double volume = 1.0)
 		: Patch(volume),
 		iir(0.001)
@@ -370,11 +394,13 @@ struct Example12Patch : public Patch
 };
 
 // Example 13: "13: All-pass Filter"
-struct Example13Patch : public Patch
+class Example13Patch : public Patch
 {
+private:
 	SineOscillator sineOsc;
 	AllPassFilter allpass;
 
+public:
 	Example13Patch(double volume = 1.0)
 		: Patch(volume),
 		allpass(50.0, 0.7)
@@ -400,11 +426,13 @@ struct Example13Patch : public Patch
 };
 
 // Example 14: "14: Low-pass Filter"
-struct Example14Patch : public Patch
+class Example14Patch : public Patch
 {
+private:
 	NoiseOscillator noiseOsc;
 	LowPassFilter lpf;
 
+public:
 	Example14Patch(double volume = 1.0)
 		: Patch(volume),
 		lpf(0.001)
@@ -430,11 +458,13 @@ struct Example14Patch : public Patch
 };
 
 // Example 15: "15: High-pass Filter"
-struct Example15Patch : public Patch
+class Example15Patch : public Patch
 {
+private:
 	NoiseOscillator noiseOsc;
 	HighPassFilter hpf;
 
+public:
 	Example15Patch(double volume = 1.0)
 		: Patch(volume),
 		hpf(0.001)
@@ -459,10 +489,12 @@ struct Example15Patch : public Patch
 };
 
 // Example 16: "16: Low Frequency Oscillator (LFO)"
-struct Example16Patch : public Patch
+class Example16Patch : public Patch
 {
+private:
 	SineRealTimeOscillator sineOsc;
 
+public:
 	Example16Patch(double volume = 1.0)
 		: Patch(volume)
 	{
@@ -478,6 +510,68 @@ struct Example16Patch : public Patch
 	{
 		double modulatedAmplitude = envelopeADSR.ModulatedAmplitude(time);
 		double result = modulatedAmplitude * sineOsc.Oscillate(time, outputFrequency, 0.0, LFO(0.02, 5.0));
+
+		result *= masterVolume;
+
+		return result;
+	}
+};
+
+// Example 17: "17: Reverb Filter (3 serial AP's)"
+class Example17Patch : public Patch
+{
+private:
+	SineOscillator sineOsc;
+	ReverberatorAP reverb;
+
+public:
+	Example17Patch(double volume = 1.0)
+		: Patch(volume)
+	{
+		envelopeADSR.attackTime = 0.01;
+		envelopeADSR.decayTime = 0.0;
+		envelopeADSR.sustainAmplitude = 1.0;
+		envelopeADSR.releaseTime = 0.1;
+		outputFrequency = 0.0;
+		masterVolume = volume;
+	}
+
+	double Run(double time)
+	{
+		double modulatedAmplitude = envelopeADSR.ModulatedAmplitude(time);
+		double result = modulatedAmplitude * sineOsc.Oscillate(outputFrequency);
+		result = reverb.Filter(result);
+
+		result *= masterVolume;
+
+		return result;
+	}
+};
+
+// Example 18: "18: Reverb Filter (3 serial AP's + 4 parallel FFCF's)"
+class Example18Patch : public Patch
+{
+private:
+	SineOscillator sineOsc;
+	ReverberatorJCREV reverb;
+
+public:
+	Example18Patch(double volume = 1.0)
+		: Patch(volume)
+	{
+		envelopeADSR.attackTime = 0.01;
+		envelopeADSR.decayTime = 0.0;
+		envelopeADSR.sustainAmplitude = 1.0;
+		envelopeADSR.releaseTime = 0.1;
+		outputFrequency = 0.0;
+		masterVolume = volume;
+	}
+
+	double Run(double time)
+	{
+		double modulatedAmplitude = envelopeADSR.ModulatedAmplitude(time);
+		double result = modulatedAmplitude * sineOsc.Oscillate(outputFrequency);
+		result = reverb.Filter(result);
 
 		result *= masterVolume;
 

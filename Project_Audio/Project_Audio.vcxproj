@@ -173,7 +173,6 @@
     <ClInclude Include="example_patches.h" />
     <ClInclude Include="feedback_comb_filter.h" />
     <ClInclude Include="feedforward_comb_filter.h" />
-    <ClInclude Include="harmonica_patch.h" />
     <ClInclude Include="highpass_filter.h" />
     <ClInclude Include="iir_filter.h" />
     <ClInclude Include="keyboard.h" />

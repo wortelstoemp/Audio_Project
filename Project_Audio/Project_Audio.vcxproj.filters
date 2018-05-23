@@ -65,9 +65,6 @@
     <ClInclude Include="allpass_filter.h">
       <Filter>Header Files\filters</Filter>
     </ClInclude>
-    <ClInclude Include="harmonica_patch.h">
-      <Filter>Header Files\patches</Filter>
-    </ClInclude>
     <ClInclude Include="mixer.h">
       <Filter>Header Files\filters</Filter>
     </ClInclude>

@@ -13,7 +13,6 @@
 #include "patch.h"
 
 #include "bell_patch.h"
-#include "harmonica_patch.h"
 #include "example_patches.h"
 
 
@@ -68,7 +67,7 @@ int main()
 	////////////////////////////////////////////////////////////////////////////
 	// NOTE: Create and set patches here
 	//Patch* patch = new HarmonicaPatch(0.4);
-	Patch* patch = new Example16Patch(0.4);
+	Patch* patch = new Example18Patch(0.4);
 	// other patches...
 
 	synth.SetPatch(patch);
