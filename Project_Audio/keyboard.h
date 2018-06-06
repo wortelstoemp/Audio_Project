@@ -120,7 +120,7 @@ struct Keyboard
 
 	bool KeyPressed(int key)
 	{
-		return (GetAsyncKeyState(key) & 0x8000);
+		return (bool)(GetAsyncKeyState(key) & 0x8000);
 	}
 
 	bool NotePressed(int index)

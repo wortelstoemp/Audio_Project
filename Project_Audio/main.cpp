@@ -2,19 +2,10 @@
 
 #include "audio_settings.h"
 #include "audio_core.h"
-#include "audio_io.h"
 #include "keyboard.h"
 
-#include "oscillator.h"
-#include "sine_oscillator.h"
-#include "saw_oscillator.h"
-#include "square_oscillator.h"
-#include "envelope_adsr.h"
 #include "patch.h"
-
-#include "bell_patch.h"
 #include "example_patches.h"
-
 
 int main()
 {
@@ -31,7 +22,10 @@ int main()
 		std::wcout << "Audio device: " << audio_device << std::endl;
 	}
 
-	AudioSettings::Properties().Init(48000, 1, 8, 512);
+	// Initialize default values, but these can be overridden by patches
+	AudioSettings::Properties().Init(44100, 1, 8, 512);
+	
+	Patch* patch = SelectAndAllocateExamplePatch();
 
 	AudioCore32Bit synth
 	(
@@ -41,12 +35,8 @@ int main()
 		AudioSettings::Properties().BlockCount(),		// blockCount, 
 		AudioSettings::Properties().BlockSampleCount()	// blockSampleCount
 	);
-	
-	////////////////////////////////////////////////////////////////////////////
-	// NOTE: Create and set patches here
-	Patch* patch = SelectAndAllocateExamplePatch();
+
 	synth.SetPatch(patch);
-	////////////////////////////////////////////////////////////////////////////
 
 	/*std::cout << std::endl <<
 	"Qwerty keyboard layout example:" << std::endl << std::endl <<

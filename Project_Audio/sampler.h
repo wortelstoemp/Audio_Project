@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "audio_io.h"
+#include "audio_settings.h"
 
 class Sampler
 {
@@ -21,6 +22,7 @@ public:
 	void Open(const char* filename)
 	{
 		stream.Open(filename);
+		AudioSettings::Properties().SampleRate(stream.SampleRate());
 	}
 
 	double Sample(double amplitude)

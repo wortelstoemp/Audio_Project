@@ -18,6 +18,11 @@ public:
 		return instance;
 	}
 
+	void SampleRate(int value)
+	{
+		sampleRate = value;
+	}
+
 	int SampleRate() const
 	{
 		return sampleRate;
