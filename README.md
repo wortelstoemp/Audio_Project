@@ -16,9 +16,9 @@ sound card which essentially is a Digital-to-Analogue Converter (DAC). To be abl
 to do this in realtime with a certain sample rate (e.g. 44.1KHz), we do the following:
 
 1. We make a queue of sample blocks each of a fixed length. In our application we
-use 8 blocks each with 256 samples. When one uses too many blocks, one gets too much
+use 8 blocks each with 256 samples. When one uses too many blocks and or to many samples, one gets too much
 latency, which is not desirable for keyboard playing. On the other side of the spectrum, 
-if one uses 1 block with 1 sample, the sound driver needs to send interrupts at a too
+if one uses e.g. 1 block with 1 sample, the sound driver needs to send interrupts at a too
 high frequency to the OS and the amount of context switching will be too high.
 Using 8 blocks of 256 samples per block is the best middleground between latency and 
 performance.
@@ -113,7 +113,7 @@ The feedback comb filter can be found in **feedback_comb_filter.h**.
 It uses a delay line with a delay in milliseconds and a certain gain.
 We use the following formula: _output[i] = input[i] + gain * output[i-D]_.
 You can hear a series of echoes with decreasing volume each time.
-The reasing for can be found in its recursive behavior.
+The reasoning herefor can be found in its recursive behavior.
 
 ### 2.10 Sampler
 When opening the sampler, you need to type the name of the sample you want to use.
