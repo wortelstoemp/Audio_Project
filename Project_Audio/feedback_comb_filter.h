@@ -25,7 +25,7 @@ public:
 
 	double Filter(double input)
 	{
-		// output[i] = input[i] + alpha * output[i-D]
+		// output[i] = input[i] + gain * output[i-D]
 		double delayedOutput = delayFilter.Filter(output);
 		output = Mixer2(input, delayedOutput, 1.0, gain);
 		return output;

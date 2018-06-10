@@ -5,18 +5,26 @@
 #include "feedforward_comb_filter.h"
 
 // Reverberator based only on all-pass filters.
-class ReverberatorAP
+class Reverberator
 {
 private:
 	AllPassFilter ap1;
 	AllPassFilter ap2;
 	AllPassFilter ap3;
+	FeedbackCombFilter ffcf1;
+	FeedbackCombFilter ffcf2;
+	FeedbackCombFilter ffcf3;
+	FeedbackCombFilter ffcf4;
 
 public:
-	ReverberatorAP()
-		: ap1(1051.0, 0.7),
-		ap2(337.0, 0.7),
-		ap3(113.0, 0.7)
+	Reverberator()
+		: ap1(1051.0, 0.9),
+		ap2(1337.0, 0.9),
+		ap3(1113.0, 0.9),
+		ffcf1(100.0, 0.742),
+		ffcf2(200.0, 0.733),
+		ffcf3(300.0, 0.715),
+		ffcf4(581.0, 0.697)
 	{
 	}
 
@@ -29,6 +37,14 @@ public:
 		output = ap3.Filter(output);
 
 		//output = output;
+
+		double output1 = ffcf1.Filter(output);
+		double output2 = ffcf2.Filter(output);
+		double output3 = ffcf3.Filter(output);
+
+		output = output1 + output2 + output3;
+		output *= 0.5;
+
 		output *= 0.8;
 
 		return output;

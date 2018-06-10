@@ -523,12 +523,12 @@ public:
 	}
 };
 
-// Example 17: "17: Reverb Filter (3 serial AP's)"
+// Example 17: "17: Reverb Filter (3 serial AP's + 4 FBCF's)"
 class Example17Patch : public Patch
 {
 private:
 	SineOscillator sineOsc;
-	ReverberatorAP reverb;
+	Reverberator reverb;
 
 public:
 	Example17Patch(double volume = 1.0)
@@ -603,7 +603,7 @@ static const char* PATCH_EXAMPLES[PATCH_EXAMPLE_COUNT] = {
 	"14: Low-pass Filter",
 	"15: High-pass Filter",
 	"16: Low Frequency Oscillator (LFO)",
-	"17: Reverb Filter (3 serial AP's)",
+	"17: Reverb Filter (3 serial AP's + 4 parallel FBCF's)",
 	"18: Reverb Filter (3 serial AP's + 4 parallel FFCF's)"
 };
 

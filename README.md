@@ -52,6 +52,7 @@ Finally we write the block to the queue. The WaveOutAPI does the rest.
 
 
 ## 2 Patches
+Note that all the example patches are hardcoded in **example_patches.h**.
 ### 2.1 Sine Oscillator
 The sine oscillator is our first and default patch which can be loaded into the synth.
 In order to avoid realtime computation of a sine for each sample, we use a wavetable.
@@ -95,6 +96,85 @@ are set programmatically. Parameters include:
 7. The time when a note is released
 
 The modulated amplitude gets computed in the **ModulatedAmplitude()** method.
+
+### 2.7 Delay Line
+The delay line is implemented in **delay_filter.h**. It is essentially just a 
+circular buffer of a certain length of samples. The amount of samples in the
+buffer is calculated via the formula: _delayMilliseconds * sampleRateHz / 1000_.
+
+### 2.8 Feedforward Comb Filter
+The feedforward comb filter can be found in **feedforward_comb_filter.h**.
+It uses a delay line with a delay in milliseconds and a certain gain.
+We use the following formula: _output[i] = input[i] + gain * input[i-D]_.
+You can hear one echo of each pressed note.
+
+### 2.9 Feedback Comb Filter
+The feedback comb filter can be found in **feedback_comb_filter.h**.
+It uses a delay line with a delay in milliseconds and a certain gain.
+We use the following formula: _output[i] = input[i] + gain * output[i-D]_.
+You can hear a series of echoes with decreasing volume each time.
+The reasing for can be found in its recursive behavior.
+
+### 2.10 Sampler
+When opening the sampler, you need to type the name of the sample you want to use.
+This sample should be placed in **ReleaseBinaries/Data**.
+To load the sample you only need to type its name, not the path. For example: **babe.wav**.
+In order to save RAM memory, only 4096 samples are read in a row.
+We use the library **libsndfile** for I/O. The implementation can be found in **sampler.h**
+and **audio_io.h**. We use a certain echo effect over the original sample, just because.
+
+### 2.11 Mixer3
+We use a mixer in this patch which mixes 2 square waves and a noise wave.
+The implementation of arbitrary mixers as an **extra** can be found in **mixer.h**.
+
+### 2.12 IIR Filter
+Exponential Time Averaging filters are low-pass filters, with roll-off -6dB/oct. 
+The only free parameter is the cut-off frequency, specified by the time constant. 
+Higher time constants yield a lower cut-off frequency.
+We can clearly hear that only lower frequencies pass the filter.
+The implementation can be found in **iir_filter.h**.
+We use the following formula: _y[n] = (1-alpha) x[n] + alpha y[n-1]_.
+
+### 2.13 All-pass Filter
+The all-pass filter can be found in **allpass_filter.h**.
+It creates a musically richer sound (chorus effect). It consists of
+a delay filter and a gain. Its filtering implementation consists of the
+combination of a feedforward and feedback comb filter.
+We use the following formulas:
+* _v[i] = x[i] - g v[i-D]_
+* _y[i] = g v[i] + v[i-D]_
+* _y[i] = -g x[i] + x[i-D] + g y[i-D]_
+
+### 2.14 Low-pass Filter
+The low-pass filter can be found in **lowpass_filter.h**. It is based on the IIR filter.
+We tried to use an alpha of 0.5 like in the book, but using ETA like in our IIR we got better results.
+Formula: _y[n] = (1-alpha) x[n] + alpha y[n-1]_.
+We can clearly hear that only lower frequencies pass the filter.
+As an input random noise is used.
+
+### 2.15 High-pass Filter
+As an **extra** the high-pass filter can be found in **highpass_filter.h**.
+Formula: _y[n] = (1-alpha) x[n] - alpha y[n-1]_.
+We can clearly hear that only higher frequencies pass the filter.
+As an input random noise is used.
+
+### 2.16 Low Frequency Oscillator (LFO)
+The LFO is implemented in **lfo.h**. We use this unit to modulate the frequency
+of our wave. As you can hear it adds a vibrato effect to the sound wave.
+The LFO has the properties: amplitude and frequency. The modulation of the frequency
+can be found in the method **ModulatedFrequency()** which takes the frequency
+of the note as an input.
+
+### 2.17 Reverb Filter (3 serial APs + 4 FBCFs)
+This reverb filter can be found in **reverb_filter.h** and uses 3 serial all-pass filters
+together with 4 feedback comb filters in parallel.
+As a result you can hear the effect of multiple echoes in a chamber.
+Certainly not optimised for polyphony as you can hear cracks when pressing multiple keys.
+
+### 2.18 Reverb Filter (3 serial APs + 4 FFCFs)
+This reverb filter can be found in **reverb_filter.h** and uses 3 serial all-pass filters
+together with 4 feedforward comb filters in parallel.
+You can clearly hear the reverb, but less echo bouncing than in the previous example.
 
 ## 3 Usage
 Please follow these steps:
